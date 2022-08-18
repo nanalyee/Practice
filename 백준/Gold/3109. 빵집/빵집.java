@@ -58,7 +58,8 @@ public class Main {
 	}
 
 
-
+	// tip! 끝까지 도달하거나 도달하지 못하는 경로라면, 해당 경로는 다시 방문하지 않아도 된다!
+	// finished로 해당 케이스가 성공함을 표시하고, 대기중인 재귀를 이어서 진행하지 않는다.
 	private static void dfs(int a, int b) {
 		
 		if (finished) return;
