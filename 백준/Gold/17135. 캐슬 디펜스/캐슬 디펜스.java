@@ -1,23 +1,22 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class Main {
 	
-	// 1. 궁수 3명 배치 (성에 배치 가능) 0
+	// 1. 궁수 3명 성에 배치 (N번째 줄, M개 중 3개 선택)
 	// 2. 게임 플레이
-	// (1) 거리가 D 이하인 적 중 가장 가까운 적 섬멸 (동시에 공격) 0
-	// (1)-1. 가장 가까운 적이 여러명이면 가장 왼쪽 적 섬멸 0
-	// (1)-2. 적이 여러 궁수에게 공격받기 가능 0
-	// (2) 공격 받은 적은 게임에서 제외 (처치 완료) 0
-	// (3) 공격이 끝나면 적은 아래로 한칸 이동 0
-	// (3)-1. 적이 성에 닿으면 게임에서 제외 (처치 불가) 0
-	// (4) 다음 라운드 0
-	// (5) 모든 적이 격자판에서 제외되면 게임 종료 0
-	// 3. 게임 종료 후 처치한 적 계산, 최고기록 갱신 -> 2번 다음 플레이
+	//   (1) 거리가 D 이하인 적 중 가장 가까운 적 섬멸 (동시에 공격)
+	//   (1)-1. 가장 가까운 적이 여러명이면 가장 왼쪽 적 섬멸
+	//   (1)-2. 적이 여러 궁수에게 공격받기 가능
+	//   (2) 공격 받은 적은 게임에서 제외 (처치 완료) 
+	//   (3) 공격이 끝나면 적은 아래로 한칸 이동 
+	//   (3)-1. 적이 성에 닿으면 게임에서 제외 (처치 불가)
+	//   (4) 다음 라운드 
+	//   (5) 모든 적이 격자판에서 제외되면 게임 종료 
+	// 3. 게임 종료 후 처치한 적 계산, 최고기록 갱신 -> 2번 다음 플레이 
 	
 	
 	static int N, M, D, kill, ans;
@@ -35,7 +34,7 @@ public class Main {
 		M = Integer.parseInt(st.nextToken()); // 가로
 		D = Integer.parseInt(st.nextToken()); // 궁수 공격 거리 제한
 		
-		map = new int[N+1][M];
+		map = new int[N][M];
 		ans = 0;
 		archer = new Point[3];
 		enemy = new ArrayList<>();
@@ -50,23 +49,11 @@ public class Main {
 				}
 			}
 		}
-		// 성 칸도 2로 넣기
-		for (int j=0; j<M; j++) { 
-			map[N][j] = 2;
-		}
-		
-		
 		//printMap(); // 맵 올바르게 되어있는지 확인
-
 		
-		// 궁수 배치
-		comb(0,0);
+		comb(0,0); // 궁수 배치
 		System.out.println(ans);
 	}
-	
-	
-
-
 
 	// 궁수 조합
 	private static void comb(int idx, int start) {
@@ -87,16 +74,6 @@ public class Main {
 		}
 		
 	}
-	
-	private static void printArcher() {
-		System.out.println("궁수 조합 확인");
-		for (int i=0; i<3; i++)
-			System.out.print("("+archer[i].x+","+archer[i].y+") ");
-		System.out.println();
-	}
-
-
-
 
 
 	// 게임 시작
@@ -158,7 +135,17 @@ public class Main {
 		
 		//System.out.println(kill);
 	}
-
+	
+	// 위치 객체
+	static class Point {
+		int x,y;
+		Point (int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	// =========================================================================
 
 	// 맵 출력
 	private static void printMap() {
@@ -180,14 +167,14 @@ public class Main {
 		System.out.println();		
 	}
 	
-	
-	static class Point {
-		int x,y;
-		Point (int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
+	// 궁수 조합 확인
+	private static void printArcher() {
+		System.out.println("궁수 조합 확인");
+		for (int i=0; i<3; i++)
+			System.out.print("("+archer[i].x+","+archer[i].y+") ");
+		System.out.println();
 	}
 	
+
 	
 }
