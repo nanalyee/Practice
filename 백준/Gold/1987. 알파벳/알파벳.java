@@ -36,7 +36,7 @@ public class Main  {
 	}
 
 	private static void dfs(int a, int b, int cnt) {
-		alphabet[map[a][b]-'0'-17] = true;
+		alphabet[map[a][b]-'A'] = true;
 				
 		for (int i=0; i<4; i++) {
 			int x = a+dx[i];
@@ -44,7 +44,7 @@ public class Main  {
 			
 			if (x<0 || y<0 || x>=r || y>=c) continue; 
 			
-			int num = map[x][y] -'0' - 17;
+			int num = map[x][y] -'A';
 			if (alphabet[num]) continue;
 			dfs(x,y,cnt+1);
 		}
@@ -53,7 +53,7 @@ public class Main  {
 
 
 		
-		alphabet[map[a][b]-'0'-17] = false;
+		alphabet[map[a][b]-'A'] = false;
 	}
 
 
