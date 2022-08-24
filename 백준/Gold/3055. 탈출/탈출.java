@@ -21,7 +21,7 @@ public class Main {
 	
 	static int R, C, endX, endY, result; // 크기, 비버굴 좌표, 최소 시간
 	static char[][] map;
-	static int[][] visited;
+	static boolean[][] visited;
 	static boolean[][] watervisited;
 	
 	public static void main(String[] args) throws IOException {
@@ -32,7 +32,7 @@ public class Main {
 		C = Integer.parseInt(st.nextToken());
 		
 		map = new char[R][C];
-		visited = new int[R][C];
+		visited = new boolean[R][C];
 		watervisited = new boolean[R][C];
 //		endX = 0; endY = 0;
 		result = 0;
@@ -65,7 +65,7 @@ public class Main {
 	private static void bfs(int startX, int startY) {
 		Queue<int[]> que = new LinkedList<>();
 		que.add(new int[] {startX, startY});
-		visited[startX][startY] = 1; // 방문 처리 위해 1부터 시작하기 때문에 결과는 -1 해줘야 함
+		visited[startX][startY] = true; // 방문 처리 위해 1부터 시작하기 때문에 결과는 -1 해줘야 함
 		int cnt=0;
 		while(!que.isEmpty()) {
 			int size = que.size();
@@ -87,16 +87,16 @@ public class Main {
 					int x = nowx+dx[d];
 					int y = nowy+dy[d];
 					
-					if (x<0 || y<0 || x>=R || y>=C || visited[x][y]!=0) continue; 
+					if (x<0 || y<0 || x>=R || y>=C || visited[x][y]) continue; 
 					// -> 물'*'과 돌'X'이 아니면 갈 수 있다.
 					// -> 다음에 물이 퍼질 곳에는 가지 못한다. (해당 좌표 상하좌우 검사해 물이 있는지 확인!)
 					if (map[x][y]=='.') {
 						que.add(new int[] {x,y});
-						visited[x][y] = visited[nowx][nowy] + 1;
+						visited[x][y] = true;
 					}
 					else if (map[x][y]=='D') {
 						que.add(new int[] {x,y});
-						visited[x][y] = visited[nowx][nowy] + 1;
+						visited[x][y] = true;
 					}
 				}
 				//printvisited();
