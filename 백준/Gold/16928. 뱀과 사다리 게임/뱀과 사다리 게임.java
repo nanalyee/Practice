@@ -8,80 +8,77 @@ import java.util.StringTokenizer;
 
 public class Main {
 	
-	static int[] map, visited;
-	static int[][] ladder, snake;
-	
+	static Point[] ladder, snake;
+	static int N, M;
+	static int[] map;
 	
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st;
 		
-		map = new int[101];
-		visited = new int[101];
-		
 		st = new StringTokenizer(br.readLine());
-		int n = Integer.parseInt(st.nextToken());
-		int m = Integer.parseInt(st.nextToken());
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
+		ladder = new Point[N];
+		snake = new Point[M];
+		map = new int[101];
 		
-		ladder = new int[n][2];
-		snake = new int[m][2];
+		for (int i=0; i<N; i++) {
+			st = new StringTokenizer(br.readLine());
+			int num = Integer.parseInt(st.nextToken());
+			ladder[i] = new Point(num, Integer.parseInt(st.nextToken()));
+			map[num] = -1;
+		}
+		for (int i=0; i<M; i++) {	
+			st = new StringTokenizer(br.readLine());
+			int num = Integer.parseInt(st.nextToken());
+			snake[i] = new Point(num, Integer.parseInt(st.nextToken()));
+			map[num] = -2;
+		}
 		
-		for (int i=0; i<n; i++) {
-			st = new StringTokenizer(br.readLine());
-			ladder[i][0] = Integer.parseInt(st.nextToken());
-			ladder[i][1] = Integer.parseInt(st.nextToken());
-			map[ladder[i][0]] = -1;
-		}
-		for (int i=0; i<m; i++) {
-			st = new StringTokenizer(br.readLine());
-			snake[i][0] = Integer.parseInt(st.nextToken());
-			snake[i][1] = Integer.parseInt(st.nextToken());
-			map[snake[i][0]] = -2;
-		}
-		//System.out.println(Arrays.toString(map));
 		bfs();
-		System.out.println(visited[100]);
+		System.out.println(map[100]);
 	}
-
-
+	
+	
 	private static void bfs() {
 		Queue<Integer> que = new LinkedList<Integer>();
 		que.add(1);
 		
 		while(!que.isEmpty()) {
-			int node = que.poll();
-			if (node==100) break;
+			int now = que.poll();
 			
 			for (int i=1; i<=6; i++) {
-				int next = node+i;
-				if (next>100 || visited[next]>0) continue;
-				
+				int next = now+i;
+				if (next>100) continue;
 				if (map[next]==-1) {
-					for (int j=0; j<ladder.length; j++) {
-						if (ladder[j][0] == next && visited[ladder[j][1]]==0 ) {
-							que.add(ladder[j][1]);
-							visited[ladder[j][1]] = visited[node]+1;
-							break;
+					for (int j=0; j<N; j++) {
+						if (next==ladder[j].x) {
+							next=ladder[j].y;
 						}
 					}
 				}
-				else if (map[next]==-2) {
-					for (int j=0; j<snake.length; j++) {
-						if (snake[j][0] == next && visited[snake[j][1]]==0 ) {
-							que.add(snake[j][1]);
-							visited[snake[j][1]] = visited[node]+1;
-							break;
-						}
+				if (map[next]==-2) {
+					for (int j=0; j<M; j++) {
+						if (next==snake[j].x) next=snake[j].y;
 					}
 				}
-				else {
-					que.add(next);
-					visited[next] = visited[node]+1;
-				}
+				if (map[next]!=0) continue;
+				map[next] = map[now]+1;
+				que.add(next);
 			}
-			
-			
-			//System.out.println(Arrays.toString(visited));
 		}
-	} 
+		
+	}
+
+	static class Point {
+		int x,y;
+
+		public Point(int x, int y) {
+			super();
+			this.x = x;
+			this.y = y;
+		}
+		
+	}
 }
