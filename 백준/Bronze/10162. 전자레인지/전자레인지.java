@@ -1,16 +1,14 @@
-import java.util.Scanner;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 class Main {
-	static public void main(String []args) throws Exception {
-        Scanner sc = new Scanner(System.in);
-		//StringBuilder sb = new StringBuilder();
-		int n = sc.nextInt();
+	static public void main(String []args) throws IOException   {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		int n = Integer.parseInt(br.readLine());
 		int[] arr = new int[3];
 		
-		if ( n<10 ) {
-			System.out.println("-1");
-		}
+		if ( n<10 ) System.out.println("-1");
 		else {
 			while ( n>=300 ) {
 				n-=300;
