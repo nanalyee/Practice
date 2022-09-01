@@ -30,7 +30,7 @@ public class Main {
 		size = str.length();
 		result = 0;
 		
-		dfs(0,0,0,false,1);
+		dfs(0,0,0,false,1); // 단어만들기 시작
 		
 		System.out.println(result);
 
@@ -38,9 +38,9 @@ public class Main {
 
 	private static void dfs(int idx, int a, int b, boolean L, long cnt) { // 자리, 모음, 자음
 		
-		if (idx==size) {
-			if (!L) return;
-			result+=cnt;
+		if (idx==size) { // 단어가 완성됨
+			if (!L) return; // L이 사용되지 않았으면 리턴
+			result+=cnt; // 누적시킨 가능한 단어 수 합함
 			return;
 		}
 		
