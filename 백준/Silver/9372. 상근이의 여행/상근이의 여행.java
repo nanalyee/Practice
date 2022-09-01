@@ -9,10 +9,9 @@ import java.util.StringTokenizer;
 
 public class Main {
 	
-	static int N, M, result;
-	static boolean visited[];
-	static ArrayList<ArrayList<Integer>> adjList;
-	
+	// 구해야 하는 정답이 비행기를 타는 최소 횟수나 최단 거리였다면? bfs. MST등..
+	// 비행기의 종류는? (국가의 수)-1
+	// 노드 N개가 있으면 노드끼리 모두 연결되기 위해 최소 N-1개의 간선이 필요하다!
 	
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -24,53 +23,15 @@ public class Main {
 		
 		for (int i=0; i<T; i++) {
 			st = new StringTokenizer(br.readLine()); 
-			N = Integer.parseInt(st.nextToken());
-			M = Integer.parseInt(st.nextToken());
-			adjList = new ArrayList<ArrayList<Integer>>();
-			visited = new boolean[N+1];
-			result = 0;
-			
-			for (int j=0; j<=N; j++) {
-				adjList.add(new ArrayList<>());
-			}
+			int N = Integer.parseInt(st.nextToken());
+			int M = Integer.parseInt(st.nextToken());
 			
 			for (int j=0; j<M; j++) {
 				st = new StringTokenizer(br.readLine()); 
-				int n1 = Integer.parseInt(st.nextToken());
-				int n2 = Integer.parseInt(st.nextToken());
-				adjList.get(n1).add(n2);
-				adjList.get(n2).add(n1);
 			}
-			
-			for(int j=0; j<=N; j++) {
-	            Collections.sort(adjList.get(j));
-	        }
-			
-			bfs();
-			sb.append(result+"\n");
+			sb.append((N-1)+"\n");
 		}
 		System.out.println(sb);
 	}
 
-
-	private static void bfs() {
-		Queue<Integer> que = new LinkedList<Integer>();
-		que.add(1);
-		visited[0]=true;
-		visited[1] = true;
-		
-		while (!que.isEmpty()) {
-			result++;
-			int now = que.poll();
-			for (int i=0; i<adjList.get(now).size(); i++) {
-				int next = adjList.get(now).get(i);
-				if(!visited[next]) {
-					visited[next] = true;
-					que.add(next);
-				}
-			}
-		}
-		
-		result = result-1;
-	}
 }
