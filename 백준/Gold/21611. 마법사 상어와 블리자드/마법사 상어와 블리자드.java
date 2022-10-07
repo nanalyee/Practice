@@ -17,20 +17,7 @@ public class Main {
 	// 4. 블리자드 M번 반복이 끝나면, 
 	//    1×(폭발한 1번 구슬의 개수) + 2×(폭발한 2번 구슬의 개수) + 3×(폭발한 3번 구슬의 개수)
 	
-	// 반례
-//	9 1
-//	0 0 0 0 0 0 0 0 0
-//	3 2 1 3 1 3 3 3 0
-//	1 3 3 3 1 3 3 1 0
-//	0 2 2 2 1 2 2 1 0
-//	0 1 2 1 0 2 2 1 0
-//	0 3 3 1 1 2 2 2 0
-//	0 3 3 3 1 1 1 2 0
-//	0 1 1 1 3 3 3 2 0
-//	0 0 0 0 0 0 0 0 0
-//	1 3
-	// 내 답: 96
-	// 답: 97
+
 	static int[] dx = {-1,1,0,0}; // 상하좌우
 	static int[] dy = {0,0,-1,1};
 	static int[] dcx = {0,1,0,-1}; // 좌하우상
@@ -38,7 +25,6 @@ public class Main {
 	
 	static int N, M, center, boom1, boom2, boom3;
 	static int[][] map;
-	static ArrayList<ArrayList<Point>> boomArea;
 	static ArrayList<Integer> list;
 	
 	public static void main(String[] args) throws IOException {
@@ -66,15 +52,10 @@ public class Main {
 			//printMap("blizzard");
 			pull(); // 빈 곳 있으면 빈곳을 없애서 하나의 리스트로 만들기
 			while (true) {
-				if (!boom()) break; // 폭발할 곳 있으면 폭발 후 메꾸기
-				//System.out.println(boom1+"!"+boom2+"!"+boom3);
+				if (!boom()) break; // 폭발할 곳 있으면 폭발
 			}
-			
 			change(); // 구슬 변화하기
-			//printMap("end");
-			
 		} 
-		
 		
 		System.out.println(1*boom1 + 2*boom2 + 3*boom3);
 	}
@@ -189,14 +170,13 @@ public class Main {
 			list.remove(num);
 		}
 		removeList = new ArrayList<>();
-		
 
 		//System.out.println("boom"+list);
 		if (boomable) return true;
 		else return false;
 	}
 
-	// 2-1. 빈칸을 메꾸기 (땡겨오기)
+
 	private static void pull() {
 		// 리스트로 뽑아오기
 		list = new ArrayList<>();
@@ -242,11 +222,4 @@ public class Main {
 		System.out.println("-------------");
 	}
 	
-	static class Point {
-		int x,y;
-		public Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
 }
