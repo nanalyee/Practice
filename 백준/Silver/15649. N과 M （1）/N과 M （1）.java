@@ -8,11 +8,12 @@ public class Main {
 	static StringBuilder sb;
 	static int[] arr;
 	static boolean[] used;
-	static int N,M;
+	static int N, M;
+	
 	
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine()," ");
+		StringTokenizer st = new StringTokenizer(br.readLine());
 		sb = new StringBuilder();
 		
 		N = Integer.parseInt(st.nextToken());
@@ -24,24 +25,22 @@ public class Main {
 		
 		System.out.println(sb);
 	}
-
+	
 	private static void perm(int idx) {
-		// 기저 조건
-		if(idx>M) {
-			for (int i=1; i<=M; i++) 
+		if (idx>M) {
+			for(int i=1; i<=M; i++) {
 				sb.append(arr[i]+" ");
-			sb.append("\n");
+			}
+			sb.append('\n');
 			return;
 		}
 		
 		for (int i=1; i<=N; i++) {
-			if (used[i]) continue; //중복 체크
-			used[i] = true; 
+			if (used[i]) continue;
+			used[i] = true;
 			arr[idx] = i;
 			perm(idx+1);
 			used[i] = false;
 		}
 	}
-	
-	
 }
