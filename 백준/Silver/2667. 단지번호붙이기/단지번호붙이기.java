@@ -1,68 +1,74 @@
-import java.util.Scanner;
-import java.io.FileInputStream;
-import java.util.*;
-import java.io.*;
-import java.math.*;
-import java.lang.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Queue;
 
-class Main {
-    // 선언
-    static int[][] map;
-    static boolean[][] visited;
-    static int[] dx = { 0,0,-1,1 }; // 위, 아래, 좌, 우
-    static int[] dy = { -1,1,0,0 };
-    static int n;
-    static int count = 0;
-    static int num = 0;
+public class Main {
+	
+	static StringBuilder sb;
+	static int[] dx = {-1,1,0,0}; // 상하좌우
+	static int[] dy = {0,0,-1,1};
+	static int N;
+	static int[][] map;
+	static boolean[][] visited;
+	static ArrayList<Integer> houseCount;
+	
+	public static void main (String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		sb = new StringBuilder();
+		
+		N = Integer.parseInt(br.readLine());
+		map = new int[N][N];
+		visited = new boolean[N][N];
+		houseCount = new ArrayList<>(); 
+		for (int i=0; i<N; i++) {
+			String str = br.readLine();
+			for (int j=0; j<N; j++) {
+				map[i][j] = str.charAt(j)-'0';
+			}
+		} // end input
+		
+		for (int i=0; i<N; i++) {
+			for (int j=0; j<N; j++) {
+				if (map[i][j]==1 && !visited[i][j]) {
+					houseCount.add(bfs(i, j));					
+				}
+			}
+		}
 
-	static public void main(String []args) throws Exception {
-        Scanner sc = new Scanner(System.in);
-
-        // 입력 및 초기화
-        n = sc.nextInt(); // map 한변
-        map = new int[n][n];
-        visited = new boolean[n][n];
-        for ( int i=0 ; i<n ; i++ ) {
-            String str = sc.next();
-            for ( int j=0 ; j<n ; j++ ) {
-                char ch = str.charAt(j);
-                map[i][j] = (int)ch-'0';
-            }
-        }
-
-        // 간선
-        ArrayList<Integer> list = new ArrayList<>();
-        for ( int i=0 ; i<n ; i++ ) {
-            for ( int j=0 ; j<n ; j++ ) {
-                if ( map[i][j] == 1 && !visited[i][j] ) {
-                    count++;
-                    dfs(i,j);
-                    list.add(num);
-                    num = 0;
-                }
-            }
-        }
-
-        System.out.println(count);
-        Collections.sort(list);
-        for ( int i=0 ; i<count; i++ ) {
-            System.out.println(list.get(i));
-        }
-    }
-
-    // dfs
-    static void dfs( int x, int y ) {
-        num++; // 아파트 누적
-        visited[x][y] = true;
-        for ( int i=0 ; i<4 ; i++ ) {
-            int a = x+dx[i];
-            int b = y+dy[i];
-            if ( a >= 0 && a < n && b >= 0 && b < n ) {
-                if ( map[a][b] == 1 && !visited[a][b] ) {
-                    dfs(a,b);
-                }
-            }
-            
-        }
-    }
+		Collections.sort(houseCount);
+		int total = houseCount.size();
+		sb.append(total+"\n");
+		for (int i=0; i<total; i++) {
+			sb.append(houseCount.get(i)+"\n");
+		}
+		System.out.println(sb);
+	}
+	
+	static int bfs(int a, int b) {
+		Queue<int[]> que = new LinkedList<int[]>();
+		que.add(new int[] {a,b});
+		int count = 0;
+		
+		while(!que.isEmpty()) {
+			int[] now = que.poll();
+			int nowx = now[0];
+			int nowy = now[1];
+			for (int i=0; i<4; i++) {
+				int x = nowx + dx[i];
+				int y = nowy + dy[i];
+				if (x<0 || y<0 || x>=N || y>=N) continue;
+				if (map[x][y]!=0 && !visited[x][y]) {
+					visited[x][y] = true;
+					que.add(new int[] {x,y});
+					count++;
+				}
+			}
+		}
+		if (count == 0) count = 1;
+		return count;
+	} 
 }
