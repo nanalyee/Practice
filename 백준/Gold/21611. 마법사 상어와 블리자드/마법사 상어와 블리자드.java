@@ -1,225 +1,216 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class Main {
 	
-	// 1. 블리자드로 파괴 -> M번 반복
-	// 2-1. 빈칸을 메꾸기 (땡겨오기)
-	// 2-1. 폭발 (4개 이상 연속 구슬) -> 1,2,3번 구슬이 몇개 폭발했는지 각각 센다
-	// -> 빈칸을 메꿀 때 4개 이상 연속구슬이 있으면 계속 반복
-	// 3. 남은 연속 구슬(4개 미만)은 하나의 그룹 -> 두개의 구슬로 변화
-	// 3-1. 구슬 A(그룹에 들어있는 구슬의 개수)와 B(그룹을 이루고 있는 구슬의 번호)
-	// 3-2. 구슬이 칸의 수보다 많아 칸에 들어가지 못하는 경우 그러한 구슬은 사라진다.
-	// 4. 블리자드 M번 반복이 끝나면, 
-	//    1×(폭발한 1번 구슬의 개수) + 2×(폭발한 2번 구슬의 개수) + 3×(폭발한 3번 구슬의 개수)
+	// 가장 왼쪽 윗 칸: (1, 1), 가장 오른쪽 아랫 칸: (N, N), 마법사 상어: ((N+1)/2, (N+1)/2)
+	// 처음에 상어가 있는 칸을 제외한 나머지 칸에는 구슬 
+	//   - 구슬은 1번 구슬, 2번 구슬, 3번 구슬
+	//   - 연속하는 구슬: 같은 번호를 가진 구슬이 번호가 연속하는 칸에 있으면
+	// 4가지 방향 ↑, ↓, ←, →가 있고, 정수 1, 2, 3, 4
 	
+	static public int[] dx = {-1,1,0,0}; // 파괴: ↑, ↓, ←, →
+	static public int[] dy = {0,0,-1,1};
+	static public int[] bx = {1,0,-1,0}; // 블리자드: ↓, →, ↑, ← 
+	static public int[] by = {0,1,0,-1};
 
-	static int[] dx = {-1,1,0,0}; // 상하좌우
-	static int[] dy = {0,0,-1,1};
-	static int[] dcx = {0,1,0,-1}; // 좌하우상
-	static int[] dcy = {-1,0,1,0};
-	
-	static int N, M, center, boom1, boom2, boom3;
+	static int N, d, s, boom1, boom2, boom3;
 	static int[][] map;
-	static ArrayList<Integer> list;
+	static Bubble[] bubbles;
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException{
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		st = new StringTokenizer(br.readLine());
+		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		
 		N = Integer.parseInt(st.nextToken()); // 격자 크기
-		M = Integer.parseInt(st.nextToken()); // 블리자드 횟수
+		int M = Integer.parseInt(st.nextToken()); // 블리자드 시전 횟수
 		map = new int[N][N];
-		center = N/2;
+		bubbles = new Bubble[N*N-1];
+		boom1 = 0;
+		boom2 = 0;
+		boom3 = 0;
+		d = 0; s = 0;
 		
 		for (int i=0; i<N; i++) {
-			st = new StringTokenizer(br.readLine());
+			st = new StringTokenizer(br.readLine(), " ");
 			for (int j=0; j<N; j++) {
 				map[i][j] = Integer.parseInt(st.nextToken());
 			}
-		} // input map
+		}
+		//printMap("입력 테스트 ");
 		
-		// 1. 블리자드로 파괴 -> M번 반복
-		for (int i=0; i<M; i++) {
-			st = new StringTokenizer(br.readLine());
-			int dir = Integer.parseInt(st.nextToken()); // 1:상, 2:하, 3:좌, 4:우
-			int dis = Integer.parseInt(st.nextToken());
-			blizzard(dir-1, dis); // 블리자드
-			//printMap("blizzard");
-			pull(); // 빈 곳 있으면 빈곳을 없애서 하나의 리스트로 만들기
-			while (true) {
-				if (!boom()) break; // 폭발할 곳 있으면 폭발
+		MakeLine(); // 번호 순서대로 1차원으로 만들기
+		
+		// 블리자드 M번 시전
+		for (int testcase=0; testcase<M; testcase++) {
+			st = new StringTokenizer(br.readLine(), " ");
+			d = Integer.parseInt(st.nextToken())-1; // 방향
+			s = Integer.parseInt(st.nextToken()); // 거리
+			
+			Destroy(); // 파괴
+			while(true) {
+				while(true) {
+					if (!isEmpty()) break; // 빈칸이 없으면 이동 반복 종료
+					Move(); // 빈칸 채우기
+				}
+				if (!Explode()) break; // 폭발할 곳 없으면 전체 반복 종료
 			}
-			change(); // 구슬 변화하기
-		} 
+			Change(); // 변화
+		}
 		
-		System.out.println(1*boom1 + 2*boom2 + 3*boom3);
+		// 출력: 1×(폭발한 1번 구슬의 개수) + 2×(폭발한 2번 구슬의 개수) + 3×(폭발한 3번 구슬의 개수)
+		System.out.println(boom1+2*boom2+3*boom3);
 	}
 	
-	private static void change() {
-		ArrayList<Integer> newList = new ArrayList<>();
-		int cnt = 1;
-		for (int i=1; i<list.size(); i++) {
-			if (list.get(i-1) == list.get(i)) {
-				cnt++;
-			}
-			if (list.get(i-1) != list.get(i)) {
- 				if (list.get(i-1)!=0) {
- 					newList.add(cnt);
- 					newList.add(list.get(i-1));
- 				}
- 				cnt = 1;
-			} 
-			if (i==list.size()-1) {
-				if (list.get(i)!=0) {
-					newList.add(cnt);
-					newList.add(list.get(i));
- 				}
+	// 구슬 1차원 배열에 번호 순서대로 담기
+	public static void MakeLine() {
+		int idx = 0;
+		for (int size=1; size<=N/2; size++) { // N=7 -> 1, 2, 3
+			int[] now = {(N+1)/2-1 -size, (N+1)/2-1 -size}; // 초기값을 한칸 위로 해버림
+			for (int dir=0; dir<4; dir++) { // 4방향을 돕니다
+				for (int j=0; j<size*2; j++) {
+					now = new int[] {now[0] + bx[dir], now[1] + by[dir]};
+					bubbles[idx] = new Bubble(now[0], now[1]);
+					idx++;
+				}
 			}
 		}
-		//System.out.println("new list"+newList);
-		
-		draw(newList);
 	}
-
-	private static void draw(ArrayList<Integer> list) {
-		// 리스트 다시 집어넣기
-		int cx = center;
-		int cy = center;
-		int dir = 0; // 왼쪽부터 시작
-		int cnt = 0;
-		for (int i=1; i<N; i++) {
-			for (int t=0; t<2; t++) {
-				for (int j=0; j<i; j++) {
-					cx = cx+dcx[dir];
-					cy = cy+dcy[dir];
-					if (list.size()>cnt) {
-						map[cx][cy] = list.get(cnt);
-						cnt++;
-					} else {
-						map[cx][cy]=0;
+	
+	// 1. 상어는 di 방향으로 거리가 si 이하인 칸에 있는 구슬을 모두 파괴 => 빈 칸
+	//    - 벽은 파괴되지 않지만, 벽에 상관없이 파괴 (막히지 않음).
+	public static void Destroy() {
+		int nowx = (N+1)/2-1;
+		int nowy = (N+1)/2-1;
+		for (int i=0; i<s; i++) {
+			int x = nowx + dx[d];
+			int y = nowy + dy[d];
+			map[x][y] = 0;
+			nowx = x;
+			nowy = y;
+		}
+		//printMap("파괴 완료");
+	}
+	
+	
+	// 2. (1) A의 번호보다 번호가 하나 작은 칸이 빈 칸이면, A에 있는 구슬은 그 빈 칸으로 이동
+	//        - 더 이상 구슬이 이동하지 않을 때까지 반복
+	public static void Move() {
+		for (int i=0; i<bubbles.length-2; i++) {
+			int nowx = bubbles[i].x;
+			int nowy = bubbles[i].y;
+			int nextx = bubbles[i+1].x;
+			int nexty = bubbles[i+1].y;
+			if (map[nowx][nowy]==0) {
+				map[nowx][nowy] = map[nextx][nexty];
+				map[nextx][nexty] = 0;
+			}
+		}
+		//printMap("이동 완료");
+	}
+	
+	// 더 이동 가능한지 확인
+	public static boolean isEmpty() {
+		boolean empty = false;
+		for (int i=0; i<bubbles.length-1; i++) {
+			int nowx = bubbles[i].x;
+			int nowy = bubbles[i].y;
+			// 이미 0을 만난적이 있는데 다를 수를 만났다 => 이동할 곳이 더 있다.
+			if (empty && map[nowx][nowy]!=0) return true; 
+			if (!empty && map[nowx][nowy]==0) empty = true; // 0을 만났음
+		}
+		return false; // 종료
+	}
+	
+	// 2. (2) 폭발하는 구슬은 4개 이상 연속하는 구슬이 있을 때 발생
+	//     - (1)번으로 빈칸을 채우고, (2)번으로 폭발. 폭발하는 구슬이 없을때까지 반복
+	public static boolean Explode() {
+		boolean isExplode = false;
+		int nowx = bubbles[0].x;
+		int nowy = bubbles[0].y;
+		int cnt = 1;
+		int pre = map[nowx][nowy];
+		for (int i=1; i<bubbles.length-1; i++) {
+			nowx = bubbles[i].x;
+			nowy = bubbles[i].y;
+			if (pre == map[nowx][nowy]) {
+				cnt++;
+			}
+			else {
+				if (cnt >= 4) {
+					for (int j=i-cnt; j<i; j++) {
+						int num = map[bubbles[j].x][bubbles[j].y];
+						if (num == 1) boom1++;
+						if (num == 2) boom2++;
+						if (num == 3) boom3++;
+ 						map[bubbles[j].x][bubbles[j].y] = 0;
+						isExplode = true;
 					}
 				}
-				dir = (dir+1)%4;
-			}
-		}
-		for (int i=1; i<N; i++) {
-			cx = cx+dcx[dir];
-			cy = cy+dcy[dir];
-			if (list.size()>cnt) {
-				map[cx][cy] = list.get(cnt);
-				cnt++;
-			} else {
-				map[cx][cy]=0;
-			}
-		}
-		
-		//printMap("draw");
-	}
-
-	private static boolean boom() {
-		boolean boomable = false;
-		int cnt = 1;
-		// 리스트에서 폭발할 곳 찾아 없애주기
-		ArrayList<Integer> removeList = new ArrayList<>();
-		
-		for (int i=1; i<list.size(); i++) {
-			
-			if (list.get(i-1) == list.get(i)) {
-				cnt++;
-			} 
-			if (list.get(i-1) != list.get(i) && cnt<4) {
-				cnt = 1;
-			} 
-			//System.out.println(i);
-			if (list.get(i-1) != list.get(i) && cnt>=4) {
-				//System.out.println(list.get(i-1));
-				int num = list.get(i-1);
-				for (int j=1; j<=cnt; j++) {
-					if (num==1) boom1++;
-					if (num==2) boom2++;
-					if (num==3) boom3++;
-					removeList.add(i-j);
-					boomable = true;
-				}
 				cnt = 1;
 			}
-			if (i==list.size()-1 && cnt>=4) {
-				int num = list.get(i);
-				for (int j=0; j<cnt; j++) {
-					if (num==1) boom1++;
-					if (num==2) boom2++;
-					if (num==3) boom3++;
-					removeList.add(i-j);
-					boomable = true;
-				}
-				cnt = 1;
-			}
+			pre = map[nowx][nowy];
 		}
-		
-		removeList.sort(null);
-		//System.out.println(removeList);
-
-		for (int j=removeList.size()-1; j>=0; j--) {
-			//System.out.println(removeList.get(j));
-			int num = removeList.get(j);
-			list.remove(num);
-		}
-		removeList = new ArrayList<>();
-
-		//System.out.println("boom"+list);
-		if (boomable) return true;
-		else return false;
-	}
-
-
-	private static void pull() {
-		// 리스트로 뽑아오기
-		list = new ArrayList<>();
-		int cx = center;
-		int cy = center;
-		int dir = 0; // 왼쪽부터 시작
-		for (int i=1; i<N; i++) {
-			for (int t=0; t<2; t++) {
-				for (int j=0; j<i; j++) {
-					cx = cx+dcx[dir];
-					cy = cy+dcy[dir];
-					if (map[cx][cy]!=0) list.add(map[cx][cy]);
-				}
-				dir = (dir+1)%4;
-			}
-		}
-		for (int i=1; i<N; i++) {
-			cx = cx+dcx[dir];
-			cy = cy+dcy[dir];
-			if (map[cx][cy]!=0) list.add(map[cx][cy]);
-		}
-		//System.out.println(list);
-	}
-
-	private static void blizzard(int dir, int dis) {
-		int cx = center;
-		int cy = center;
-		for (int i=0; i<dis; i++) {
-			cx += dx[dir];
-			cy += dy[dir];
-			map[cx][cy] = 0;
-		}
+		//printMap("폭발"+isExplode);
+		return isExplode;
 	}
 	
-	private static void printMap(String method) {
-		System.out.println(method+"-----");
+	
+	// 3. 구슬이 변화
+	//    - 연속하는 구슬은 하나의 그룹 => 하나의 그룹은 두 개의 구슬 A와 B로 변한다
+	//    - 구슬 A의 번호는 그룹에 들어있는 구슬의 개수, B는 그룹을 이루고 있는 구슬의 번호
+	//    - 구슬이 칸의 수보다 많아 칸에 들어가지 못하는 경우 그러한 구슬은 사라진다
+	public static void Change() {
+		int nowx = bubbles[0].x;
+		int nowy = bubbles[0].y;
+		int cnt = 1;
+		int pre = map[nowx][nowy];
+		int[] newBubbles = new int[bubbles.length];
+		int idx = 0;
+		for (int i=1; i<bubbles.length-1; i++) {
+			nowx = bubbles[i].x;
+			nowy = bubbles[i].y;
+			if (pre == map[nowx][nowy]) {
+				cnt++;
+			}
+			else {
+				//System.out.println(cnt+" "+pre);
+				if (idx<newBubbles.length) {
+					newBubbles[idx++] = cnt;
+					newBubbles[idx++] = pre;					
+				}
+				cnt = 1;
+			}
+			pre = map[nowx][nowy];
+		}
+		
+		for (int i=0; i<bubbles.length-1; i++) {
+			map[bubbles[i].x][bubbles[i].y] = newBubbles[i];
+		}
+		//printMap("변화 완료");
+	}
+	
+
+	
+	
+	public static void printMap(String str) {
+		System.out.println(str+"==============");
 		for (int i=0; i<N; i++) {
 			for (int j=0; j<N; j++) {
 				System.out.print(map[i][j]+" ");
 			}
 			System.out.println();
-		} 
-		System.out.println("-------------");
+		}
+		System.out.println("---------------");
 	}
 	
+	public static class Bubble {
+		int x, y;
+		Bubble(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
 }
