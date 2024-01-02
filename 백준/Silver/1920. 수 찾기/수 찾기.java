@@ -18,8 +18,8 @@ public class Main {
 		int M = Integer.parseInt(br.readLine());
 		st = new StringTokenizer(br.readLine(), " ");
 		for (int i=0; i<M; i++) {
-			if (A.contains(Integer.parseInt(st.nextToken()))) sb.append("1"+"\n");
-			else sb.append("0"+"\n");
+			if (A.contains(Integer.parseInt(st.nextToken()))) sb.append(1).append("\n");
+			else sb.append(0).append("\n");
 		}
 		System.out.println(sb);
 	}
